@@ -1,7 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch,Pressable,Alert } from 'react-native';
 import WrapperContainer from '../../components/wrapperContainer';
 import FontFamily from '../../constants/FontFamily';
+import { createMMKV } from 'react-native-mmkv';
+import { useDispatch } from 'react-redux';
+import { logoutUser } from '../../redux/reducers/authSlice';
+// import { Pressable } from 'react-native/types_generated/index';
+
 
 // Segmented Control Component
 const SegmentedControl = ({ label, options, selectedOption, onSelect }) => {
@@ -30,6 +35,13 @@ const SegmentedControl = ({ label, options, selectedOption, onSelect }) => {
 };
 
 const SettingsScreen = () => {
+  const dispatch=useDispatch()
+  const storage = createMMKV();
+  const deleteUserCall=()=>{
+    storage.remove('token');
+    dispatch(logoutUser())
+    Alert.alert('done');
+  }
   // States for Units
   const [temperature, setTemperature] = useState('Celsius');
   const [windSpeed, setWindSpeed] = useState('km/h');
@@ -128,6 +140,10 @@ const SettingsScreen = () => {
         </View>
 
         <View style={{ height: 40 }} />
+
+        <Pressable onPress={()=>deleteUserCall()}>
+          <Text style={{color:'white'}}>Delete User</Text>
+        </Pressable>
       </ScrollView>
     </WrapperContainer>
   );

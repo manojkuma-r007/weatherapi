@@ -2,9 +2,17 @@ import React from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
 import FontFamily from '../constants/FontFamily';
 import ImagePath from '../constants/ImagePath';
+import { FlatList } from 'react-native-gesture-handler';
+import moment from 'moment';
 
+const TodayWeatherInfoComponent = ({data}) => {
 
-const TodayWeatherInfoComponent = () => {
+  if (!data || data.length === 0) {
+    return null;
+  }
+
+  console.log(data[0]?.hour, 'data');
+
   return (
 
     <View style={styles.mainStyle}>
@@ -12,15 +20,26 @@ const TodayWeatherInfoComponent = () => {
       <Text style={styles.titleTextStyle}>TODAY'S FORCAST</Text>
       <View style={styles.containView}>
 
-        <View style={styles.itemStyleView}>
-          <Text style={styles.timeTextStyle}>{"9.00 AM"}</Text>
+        
+
+        <FlatList
+        horizontal={true}
+        data={data[0]?.hour}
+        renderItem={({item})=>{
+          console.log(item,'item')
+          return(
+           <View style={styles.itemStyleView}>
+          <Text style={styles.timeTextStyle}>{moment(item?.time).format('hh:mm A')}</Text>
           <Image
             style={styles.cloudSun}
-            source={ImagePath.cloudsun} />
-            <Text style={{...styles.timeTextStyle,marginTop:10}}>{'25°'}</Text>
+            source={item?.is_day == 0 ? ImagePath.sun : ImagePath.cloudsun} />
+            <Text style={{...styles.timeTextStyle,marginTop:10}}>{item?.temp_c}</Text>
         </View>
+          )
+        }}
+        />
 {}
-        <View style={styles.itemStyleView}>
+        {/* <View style={styles.itemStyleView}>
           <Text style={styles.timeTextStyle}>{"9.00 AM"}</Text>
           <Image
             style={styles.cloudSun}
@@ -35,7 +54,7 @@ const TodayWeatherInfoComponent = () => {
             style={styles.cloudSun}
             source={ImagePath.sun} />
             <Text style={{...styles.timeTextStyle,marginTop:10}}>{'33°'}</Text>
-        </View>
+        </View> */}
 
       </View>
 

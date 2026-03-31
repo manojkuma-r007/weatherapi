@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, FlatList, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -7,11 +7,18 @@ import FontFamily from '../../constants/FontFamily';
 import TodayWeatherInfoComponent from '../../components/TodayWeatherInfoComponent'
 
 import ImagePath from '../../constants/ImagePath';
-// import { FlatList } from 'react-native/types_generated/index';
-// import { StyleSheet } from 'react-native/types_generated/index';
+import axios from 'axios';
+import { Current_Api } from '../../cofig/urls'
+import { Forecast_Api } from '../../cofig/urls'
+
+
 
 const Home = () => {
   const navigation = useNavigation();
+
+  const [currentLatlong, setCurrentLatlong] = useState('13.0843,80.2705');
+  const [currentLocationData, setcurrentLocationData] = useState(null);
+  const [forecastData, setForecastData] = useState(null);
 
   const weekWeather = [
     { day: "Monday", weather: "Sunny", temperature: "38/28" },
@@ -22,20 +29,54 @@ const Home = () => {
     { day: "Saturday", weather: "Rainy", temperature: "29/20" },
     { day: "Sunday", weather: "Sunny", temperature: "31/19" },
   ];
+
+  const callTheForecastApi = async () => {
+    try {
+      const res = axios.get(Forecast_Api(currentLatlong, 1)).then((res) => {
+        console.log(res, 'forecast');
+        setForecastData(res);
+      })
+    } catch (error) {
+      console.log(error, 'errorforecast');
+    }
+  };
+
+  const callTheCurrentApi = async () => {
+    try {
+      const res = axios.get(Current_Api(currentLatlong)).then((res) => {
+        console.log(res, 'resss');
+        setcurrentLocationData(res);
+      })
+    } catch (error) {
+      console.log(error, 'error');
+    }
+  };
+
+  useEffect(() => {
+    callTheCurrentApi();
+    callTheForecastApi();
+  }, []);
+
+  console.log(currentLocationData, 'currentLocationData')
+
+  console.log(currentLocationData?.data?.current?.condition?.icon, 'currentLocationData?.data?.current?.is_day')
+
+  console.log(forecastData?.data?.forecast?.forecastday[0].hour, 'forecastData')
+
   return (
 
     <WrapperContainer>
       <ScrollView>
         <View style={styles.mainStyle}>
-          <Text style={styles.textStyle}>{"helllo"}</Text>
-          <Text style={styles.changeText}>{"Change of the rain 0%"}</Text>
-          <Image style={styles.centreImage} source={ImagePath.sun} />
-          <Text style={{ ...styles.textStyle, marginTop: 32 }}> {"31°"}</Text>
+          <Text style={styles.textStyle}>{currentLocationData?.data?.location?.name}</Text>
+          <Text style={styles.changeText}>{`Change of the rain 0%:${currentLocationData?.data?.current?.precip_mm}`}</Text>
+          <Image style={styles.centreImage} source={currentLocationData?.data?.current?.is_day == 0 ? ImagePath.sun : ImagePath.cloudsun} />
+          <Text style={{ ...styles.textStyle, marginTop: 32 }}> {`${currentLocationData?.data?.current?.temp_c}°`}</Text>
 
 
           <View >
-            <TodayWeatherInfoComponent />
-              <View
+            <TodayWeatherInfoComponent data={forecastData?.data?.forecast?.forecastday}/>
+            <View
               style={{
                 marginTop: 20,
                 backgroundColor: '#1f242d',
